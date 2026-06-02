@@ -1,14 +1,25 @@
 <script setup>
-// Pure setup script test
+import Navbar from './components/Navbar.vue';
+import Banner from './components/Banner.vue';
+import Projects from './components/Projects.vue';
+import Contact from './components/Contact.vue';
+import FooterComponent from './components/FooterComponent.vue'; // Matching your exact sidebar file name
 </script>
 
 <template>
-  <div style="padding: 50px; text-align: center; font-family: sans-serif;">
-    <h1>Gladys Ramos - Portfolio Live Test</h1>
-    <p>If you see this, the Vercel build engine is officially working!</p>
+  <div>
+    <Navbar />
+    <Banner />
+    <Projects />
+    <Contact />
+    <FooterComponent />
   </div>
 </template>
 
-<style scoped>
-/* No styles needed for test */
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #ffffff;
+}
 </style>
