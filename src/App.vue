@@ -3,7 +3,7 @@ import Navbar from './components/Navbar.vue';
 import Banner from './components/Banner.vue';
 import Projects from './components/Projects.vue';
 import Contact from './components/Contact.vue';
-import FooterComponent from './components/FooterComponent.vue'; // Matching your exact sidebar file name
+import FooterComponent from './components/FooterComponent.vue';
 </script>
 
 <template>
