@@ -1,25 +1,14 @@
 <script setup>
-import Navbar from './components/Navbar.vue';
-import Banner from './components/Banner.vue';
-import Projects from './components/Projects.vue';
-import Contact from './components/Contact.vue';
-import Footer from './components/Footer.vue';
+// Pure setup script test
 </script>
 
 <template>
-  <div>
-    <Navbar />
-    <Banner />
-    <Projects />
-    <Contact />
-    <Footer />
+  <div style="padding: 50px; text-align: center; font-family: sans-serif;">
+    <h1>Gladys Ramos - Portfolio Live Test</h1>
+    <p>If you see this, the Vercel build engine is officially working!</p>
   </div>
 </template>
 
-<style>
-/* Global resets or layout styles can go here */
-body {
-  margin: 0;
-  font-family: sans-serif;
-}
+<style scoped>
+/* No styles needed for test */
 </style>
