@@ -18,37 +18,32 @@
 	// The submitForm() function handles the contact form submission.
 // ... existing code ...
 
-const submitForm = async () => {
-    //if (!recaptchaToken.value) {
-    //    notyf.error('Please verify that you are not a robot');
-    //    return;
-    //}
+// The submitForm() function handles the contact form submission.
+	const submitForm = async () => {
 
-    isLoading.value = true;
+		// While the email is being sent, disable the button and change text to "Sending..."
+		isLoading.value = true;
 
-    try {
-        const response = await fetch("https://api.web3forms.com/submit", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                access_key: WEB3FORMS_ACCESS_KEY, // <--- IT GOES RIGHT HERE!
-                subject: subject,
-                name: name.value,
-                email: email.value,
-                message: message.value,
-                "g-recaptcha-response": recaptchaToken.value
-            })
-        });
-
-// ... rest of your code ...
+		try {
+			// Send HTTP request to Web3Forms API
+			const response = await fetch("https://api.web3forms.com/submit", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Accept": "application/json"
+				},
+				body: JSON.stringify({
+					access_key: WEB3FORMS_ACCESS_KEY,
+					subject: subject,
+					name: name.value,
+					email: email.value,
+					message: message.value
+				})
+			});
 
 			const result = await response.json();
 
 			if (result.success) {
-				console.log(result);
 				isLoading.value = false;
 				notyf.success("Message Sent!");
 				
@@ -61,14 +56,11 @@ const submitForm = async () => {
 				notyf.error(result.message || "Failed to send message.");
 			}
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 			isLoading.value = false;
 			notyf.error("Failed to send message.");
-		} finally {
-			resetRecaptcha();
 		}
 	}
-
 	/* reCAPTCHA Integration */
 
 	// 2. Google reCAPTCHA V2 Site Key updated with your personal verified key
