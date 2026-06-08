@@ -16,7 +16,7 @@
 	const subject = "New message from Gladys Ramos Portfolio";
 
 	/* reCAPTCHA Integration Setup */
-	const SITE_KEY = '6LdfC0MfAAAAAF963m998U0ky9snF_1E_z8isY6v';  
+	const SITE_KEY = '6Lcy8BMtAAAAAMbnDD5XcHoolE9wWIw_G9xuVp48';  
 
 	const recaptchaContainer = ref(null);
 	const recaptchaWidgetId = ref(null);
