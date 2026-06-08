@@ -16,34 +16,34 @@
 	const subject = "New message from Gladys Ramos Portfolio";
 
 	// The submitForm() function handles the contact form submission.
-	const submitForm = async () => {
+// ... existing code ...
 
-		// Ensure the user completes the reCAPTCHA challenge before submitting the form.
-		if (!recaptchaToken.value) {
-			notyf.error('Please verify that you are not a robot');
-			return;
-		}
+const submitForm = async () => {
+    //if (!recaptchaToken.value) {
+    //    notyf.error('Please verify that you are not a robot');
+    //    return;
+    //}
 
-		// While the email is being sent, disable the button and change text to "Sending..."
-		isLoading.value = true;
+    isLoading.value = true;
 
-		try {
-			// Send HTTP request to Web3Forms API
-			const response = await fetch("https://api.web3forms.com/submit", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"Accept": "application/json"
-				},
-				body: JSON.stringify({
-					access_key: WEB3FORMS_ACCESS_KEY,
-					subject: subject,
-					name: name.value,
-					email: email.value,
-					message: message.value,
-					"g-recaptcha-response": recaptchaToken.value
-				})
-			});
+    try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                access_key: WEB3FORMS_ACCESS_KEY, // <--- IT GOES RIGHT HERE!
+                subject: subject,
+                name: name.value,
+                email: email.value,
+                message: message.value,
+                "g-recaptcha-response": recaptchaToken.value
+            })
+        });
+
+// ... rest of your code ...
 
 			const result = await response.json();
 
@@ -72,7 +72,7 @@
 	/* reCAPTCHA Integration */
 
 	// 2. Google reCAPTCHA V2 Site Key updated with your personal verified key
-	const SITE_KEY = '6LcySgctAAAAAG39ijQWxZ3P9AqcGre6tWT3EC71';  
+	const SITE_KEY = '6LdfC0MfAAAAAF963m998U0ky9snF_1E_z8isY6v';  
 
 	const recaptchaContainer = ref(null);
 	const recaptchaWidgetId = ref(null);
