@@ -128,7 +128,7 @@
 </script>
 
 <template>
-	<h1 class="text-center my-4 pt-5" id="contact">Contact Gladys Ramos</h1>
+	<h1 class="text-center my-4 pt-5" id="contact">Get in Touch</h1>
 	<div class="contact-section container">
 		<div class="row align-items-center mt-4">
 			<div class="col-md-6 mb-4 mb-md-0 text-center">
