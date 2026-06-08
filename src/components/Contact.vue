@@ -32,21 +32,20 @@
 	}
 
 	function renderRecaptcha() {
-		if (!window.grecaptcha || !window.grecaptcha.enterprise) {
-			console.error('reCAPTCHA Enterprise not loaded');
-			return;
+		if (window.grecaptcha && window.grecaptcha.enterprise && recaptchaContainer.value) {
+			recaptchaWidgetId.value = window.grecaptcha.enterprise.render(recaptchaContainer.value, {
+				sitekey: SITE_KEY,
+				size: 'normal',
+				callback: onRecaptchaSuccess,
+				'expired-callback': onRecaptchaExpired,
+			});
+		} else {
+			console.error('reCAPTCHA Enterprise target or container missing.');
 		}
-
-		recaptchaWidgetId.value = window.grecaptcha.enterprise.render(recaptchaContainer.value, {
-			sitekey: SITE_KEY,
-			size: 'normal',
-			callback: onRecaptchaSuccess,
-			'expired-callback': onRecaptchaExpired,
-		});
 	}
 
 	function resetRecaptcha() {
-		if (recaptchaWidgetId.value !== null) {
+		if (recaptchaWidgetId.value !== null && window.grecaptcha && window.grecaptcha.enterprise) {
 			window.grecaptcha.enterprise.reset(recaptchaWidgetId.value);
 			recaptchaToken.value = '';
 		}
@@ -55,4 +54,116 @@
 	// The submitForm() function handles the contact form submission.
 	const submitForm = async () => {
 		// Validation check: ensure token exists from reCAPTCHA verification
-		if (!recaptchaToken
+		if (!recaptchaToken.value) {
+			notyf.error('Please verify that you are not a robot.');
+			return;
+		}
+
+		// While the email is being sent, disable the button and change text to "Sending..."
+		isLoading.value = true;
+
+		try {
+			// Send HTTP request to Web3Forms API
+			const response = await fetch("https://api.web3forms.com/submit", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Accept": "application/json"
+				},
+				body: JSON.stringify({
+					access_key: WEB3FORMS_ACCESS_KEY,
+					subject: subject,
+					name: name.value,
+					email: email.value,
+					message: message.value,
+					"g-recaptcha-response": recaptchaToken.value // Appends verified token payload to Web3Forms
+				})
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				notyf.success("Message Sent!");
+				
+				// Clear form inputs and reset captcha on success
+				name.value = "";
+				email.value = "";
+				message.value = "";
+				resetRecaptcha();
+			} else {
+				notyf.error(result.message || "Failed to send message.");
+				resetRecaptcha(); // Reset captcha widget so they can retry
+			}
+		} catch (error) {
+			console.error(error);
+			notyf.error("Failed to send message.");
+			resetRecaptcha();
+		} finally {
+			isLoading.value = false;
+		}
+	}
+
+	onMounted(() => {
+		// If the script loaded before the component mounted, render it immediately
+		if (window.grecaptcha && window.grecaptcha.enterprise && window.grecaptcha.enterprise.render) {
+			renderRecaptcha();
+		} else {
+			// Otherwise, bind the global window callback that index.html is looking for
+			window.onloadCallback = () => {
+				renderRecaptcha();
+			};
+		}
+	});
+
+	onBeforeUnmount(() => {
+		// Clean up global window bindings to prevent memory leaks
+		if (window.onloadCallback) {
+			window.onloadCallback = null;
+		}
+	});
+</script>
+
+<template>
+	<h1 class="text-center my-4 pt-5" id="contact">Contact Gladys Ramos</h1>
+	<div class="contact-section container">
+		<div class="row align-items-center mt-4">
+			<div class="col-md-6 mb-4 mb-md-0 text-center">
+				<div class="p-5 bg-light rounded shadow-sm">
+					<h4>Let's Build Something Together!</h4>
+					<p class="text-muted">Drop me a line or connect with me via my professional networks below.</p>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<form @submit.prevent="submitForm">
+					<div class="mb-3">
+						<input type="text" id="firstName" v-model="name" class="form-control" placeholder="Name" required>
+					</div>
+					<div class="mb-3">
+						<input type="email" id="email" v-model="email" class="form-control" placeholder="Email Address" required>
+					</div>
+					<div class="mb-3">
+						<textarea id="message" class="form-control" v-model="message" rows="6" placeholder="Your Message" required></textarea>
+					</div>
+					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+						<div class="social-icons d-flex gap-3 fs-4">
+							<a href="https://www.linkedin.com/in/gladysramos" target="_blank" id="linkedin"><i class="fab fa-linkedin"></i></a>
+							<a href="https://git.zuitt.co/gladysintelligentsia" target="_blank" id="gitlab"><i class="fab fa-gitlab"></i></a>
+							<a href="https://github.com/gladysintelligentsia" target="_blank" id="github"><i class="fab fa-github"></i></a>
+						</div>
+						<button type="submit" class="btn btn-primary px-4" :disabled="isLoading">
+							{{ isLoading ? "Sending..." : "Submit" }}
+						</button>
+					</div>
+
+					<div class="d-flex justify-content-end mt-3">
+						<div ref="recaptchaContainer"></div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</template>
+
+<style scoped>
+	.social-icons a {
+		color: #495057;
