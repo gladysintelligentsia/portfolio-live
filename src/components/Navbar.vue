@@ -6,7 +6,7 @@
 	
 	<!-- Start of Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="menu">
-        <a href="#landing" class="navbar-brand d-lg-none">Charles</a>
+        <a href="#landing" class="navbar-brand d-lg-none">Gladys Ramos</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#portfolio-nav">
             <span class="navbar-toggler-icon"></span>
         </button>
