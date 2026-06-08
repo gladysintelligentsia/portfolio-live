@@ -1,6 +1,6 @@
 <script setup>
 	import { Notyf } from 'notyf';
-	import { ref } from 'vue';
+	import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 	const notyf = new Notyf();
 
@@ -15,12 +15,54 @@
 	// Email subject that will appear when a form submission is received.
 	const subject = "New message from Gladys Ramos Portfolio";
 
-	// The submitForm() function handles a pure Web3Forms contact submission.
+	/* reCAPTCHA Integration Setup */
+	// 2. Google reCAPTCHA V2 Site Key updated with your personal verified key
+	const SITE_KEY = '6LdfC0MfAAAAAF963m998U0ky9snF_1E_z8isY6v';  
+
+	const recaptchaContainer = ref(null);
+	const recaptchaWidgetId = ref(null);
+	const recaptchaToken = ref('');
+
+	function onRecaptchaSuccess(token) {
+		recaptchaToken.value = token;
+	}
+
+	function onRecaptchaExpired() {
+		recaptchaToken.value = '';
+	}
+
+	function renderRecaptcha() {
+		if (window.grecaptcha && window.grecaptcha.enterprise && recaptchaContainer.value) {
+			recaptchaWidgetId.value = window.grecaptcha.enterprise.render(recaptchaContainer.value, {
+				sitekey: SITE_KEY,
+				size: 'normal',
+				callback: onRecaptchaSuccess,
+				'expired-callback': onRecaptchaExpired,
+			});
+		} else {
+			console.error('reCAPTCHA Enterprise target or container missing.');
+		}
+	}
+
+	function resetRecaptcha() {
+		if (recaptchaWidgetId.value !== null && window.grecaptcha && window.grecaptcha.enterprise) {
+			window.grecaptcha.enterprise.reset(recaptchaWidgetId.value);
+			recaptchaToken.value = '';
+		}
+	}
+
+	// The submitForm() function handles the contact form submission.
 	const submitForm = async () => {
+		// Validation check: ensure token exists from reCAPTCHA verification
+		if (!recaptchaToken.value) {
+			notyf.error('Please verify that you are not a robot.');
+			return;
+		}
+
 		isLoading.value = true;
 
 		try {
-			// Send HTTP request to Web3Forms API without reCAPTCHA validation tokens
+			// Send HTTP request to Web3Forms API
 			const response = await fetch("https://api.web3forms.com/submit", {
 				method: "POST",
 				headers: {
@@ -32,7 +74,8 @@
 					subject: subject,
 					name: name.value,
 					email: email.value,
-					message: message.value
+					message: message.value,
+					"g-recaptcha-response": recaptchaToken.value // Attaches the verified token payload to Web3Forms
 				})
 			});
 
@@ -41,20 +84,41 @@
 			if (result.success) {
 				notyf.success("Message Sent!");
 				
-				// Clear form inputs on success
+				// Clear form inputs and reset captcha widget on success
 				name.value = "";
 				email.value = "";
 				message.value = "";
+				resetRecaptcha();
 			} else {
 				notyf.error(result.message || "Failed to send message.");
+				resetRecaptcha();
 			}
 		} catch (error) {
 			console.error(error);
 			notyf.error("Failed to send message.");
+			resetRecaptcha();
 		} finally {
 			isLoading.value = false;
 		}
 	}
+
+	onMounted(() => {
+		// If the script loaded before the component mounted, render it immediately
+		if (window.grecaptcha && window.grecaptcha.enterprise && window.grecaptcha.enterprise.render) {
+			renderRecaptcha();
+		} else {
+			// Otherwise, bind the global window callback that index.html is looking for
+			window.onloadCallback = () => {
+				renderRecaptcha();
+			};
+		}
+	});
+
+	onBeforeUnmount(() => {
+		if (window.onloadCallback) {
+			window.onloadCallback = null;
+		}
+	});
 </script>
 
 <template>
@@ -87,6 +151,10 @@
 						<button type="submit" class="btn btn-primary px-4" :disabled="isLoading">
 							{{ isLoading ? "Sending..." : "Submit" }}
 						</button>
+					</div>
+
+					<div class="d-flex justify-content-end mt-3">
+						<div ref="recaptchaContainer"></div>
 					</div>
 				</form>
 			</div>
