@@ -144,6 +144,11 @@
 					<div class="mb-3">
 						<textarea id="message" class="form-control" v-model="message" rows="6" placeholder="Your Message" required></textarea>
 					</div>
+
+					<div class="mb-4 d-flex justify-content-start">
+						<div ref="recaptchaContainer"></div>
+					</div>
+
 					<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 						<div class="social-icons d-flex gap-3 fs-4">
 							<a href="https://www.linkedin.com/in/gladysramos" target="_blank" id="linkedin"><i class="fab fa-linkedin"></i></a>
@@ -153,10 +158,6 @@
 						<button type="submit" class="btn btn-primary px-4" :disabled="isLoading">
 							{{ isLoading ? "Sending..." : "Submit" }}
 						</button>
-					</div>
-
-					<div class="d-flex justify-content-end mt-3">
-						<div ref="recaptchaContainer"></div>
 					</div>
 				</form>
 			</div>
