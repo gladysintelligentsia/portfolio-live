@@ -31,9 +31,12 @@
 	}
 
 	function renderRecaptcha() {
-		// Defensive check: ensure the DOM element exists and grecaptcha is fully ready
+		// Clean rendering path: Verify the element is ready and target standard engine
 		if (window.grecaptcha && window.grecaptcha.render && recaptchaContainer.value) {
 			try {
+				// Clear any lingering rendering artifacts before drawing the fresh widget
+				recaptchaContainer.value.innerHTML = "";
+				
 				recaptchaWidgetId.value = window.grecaptcha.render(recaptchaContainer.value, {
 					sitekey: SITE_KEY,
 					size: 'normal',
@@ -41,7 +44,7 @@
 					'expired-callback': onRecaptchaExpired,
 				});
 			} catch (error) {
-				console.warn("reCAPTCHA instance already rendered or failed initialization:", error);
+				console.warn("reCAPTCHA rendering handled natively:", error);
 			}
 		}
 	}
@@ -99,33 +102,27 @@
 		}
 	}
 
-	// ADVANCED LIFECYCLE HANDLER
-	onMounted(() => {
-		// Fallback: Bind to the global window space right away in case script finishes late
-		window.onloadCallback = () => {
-			renderRecaptcha();
-		};
+	// Native Single-Page-App Lifecycle Management
+	let checkInterval = null;
 
-		// Main Path: If window.grecaptcha exists right now, try to build immediately
+	onMounted(() => {
+		// If the core script has loaded already, execute immediately
 		if (window.grecaptcha && window.grecaptcha.render) {
 			renderRecaptcha();
 		} else {
-			// Fail-safe Interval: Polling verification checks every 400ms for slow networks
-			const checkInterval = setInterval(() => {
+			// Fail-safe interval polling: checks every 300ms if script finishes late
+			checkInterval = setInterval(() => {
 				if (window.grecaptcha && window.grecaptcha.render) {
 					renderRecaptcha();
 					clearInterval(checkInterval);
 				}
-			}, 400);
-
-			// Clean up interval if component destroys before loading finishes
-			onBeforeUnmount(() => clearInterval(checkInterval));
+			}, 300);
 		}
 	});
 
 	onBeforeUnmount(() => {
-		if (window.onloadCallback) {
-			window.onloadCallback = null;
+		if (checkInterval) {
+			clearInterval(checkInterval);
 		}
 	});
 </script>
@@ -152,7 +149,6 @@
 						<textarea id="message" class="form-control" v-model="message" rows="6" placeholder="Your Message" required></textarea>
 					</div>
 
-					<!-- Container explicitly structured within main flow -->
 					<div class="mb-4 d-flex justify-content-start" style="min-height: 78px;">
 						<div ref="recaptchaContainer"></div>
 					</div>
