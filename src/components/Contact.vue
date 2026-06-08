@@ -70,7 +70,7 @@
 			<div class="col-md-6">
 				<form @submit.prevent="submitForm">
 					<div class="mb-3">
-						<input type="text" id="firstName" v-model="name" class="form-control" placeholder="Name" required>
+						<input type="text" id="name" v-model="name" class="form-control" placeholder="Name" required>
 					</div>
 					<div class="mb-3">
 						<input type="email" id="email" v-model="email" class="form-control" placeholder="Email Address" required>
