@@ -32,21 +32,23 @@
 	}
 
 	function renderRecaptcha() {
-		if (window.grecaptcha && window.grecaptcha.enterprise && recaptchaContainer.value) {
-			recaptchaWidgetId.value = window.grecaptcha.enterprise.render(recaptchaContainer.value, {
+		// Updated: Target standard grecaptcha engine instead of enterprise
+		if (window.grecaptcha && window.grecaptcha.render && recaptchaContainer.value) {
+			recaptchaWidgetId.value = window.grecaptcha.render(recaptchaContainer.value, {
 				sitekey: SITE_KEY,
 				size: 'normal',
 				callback: onRecaptchaSuccess,
 				'expired-callback': onRecaptchaExpired,
 			});
 		} else {
-			console.error('reCAPTCHA Enterprise target or container missing.');
+			console.error('reCAPTCHA target or container missing.');
 		}
 	}
 
 	function resetRecaptcha() {
-		if (recaptchaWidgetId.value !== null && window.grecaptcha && window.grecaptcha.enterprise) {
-			window.grecaptcha.enterprise.reset(recaptchaWidgetId.value);
+		// Updated: Reset standard grecaptcha engine widget
+		if (recaptchaWidgetId.value !== null && window.grecaptcha && window.grecaptcha.reset) {
+			window.grecaptcha.reset(recaptchaWidgetId.value);
 			recaptchaToken.value = '';
 		}
 	}
@@ -75,7 +77,7 @@
 					name: name.value,
 					email: email.value,
 					message: message.value,
-					"g-recaptcha-response": recaptchaToken.value // Attaches the verified token payload to Web3Forms
+					"g-recaptcha-response": recaptchaToken.value // Appends verified token payload to Web3Forms
 				})
 			});
 
@@ -103,8 +105,8 @@
 	}
 
 	onMounted(() => {
-		// If the script loaded before the component mounted, render it immediately
-		if (window.grecaptcha && window.grecaptcha.enterprise && window.grecaptcha.enterprise.render) {
+		// Updated: Initialize immediately if standard rendering hooks exist
+		if (window.grecaptcha && window.grecaptcha.render) {
 			renderRecaptcha();
 		} else {
 			// Otherwise, bind the global window callback that index.html is looking for
